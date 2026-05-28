@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>鄱阳湖区位图</title>
+  <title>守望鄱阳湖</title>
   <link
     rel="stylesheet"
     href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
@@ -13,41 +13,118 @@
   <style>
     :root {
       --bg: #f5f2ec;
-      --panel: rgba(255, 252, 247, 0.94);
+      --panel: rgba(255, 252, 247, 0.96);
       --ink: #2d3943;
-      --muted: #6b7680;
+      --muted: #64717b;
       --accent: #4d7e65;
       --accent-soft: rgba(77, 126, 101, 0.1);
       --water: #5e9ccb;
-      --water-soft: rgba(169, 211, 233, 0.18);
-      --border: #d2d8da;
+      --border: rgba(210, 216, 218, 0.8);
+      --shadow: 0 20px 50px rgba(26, 39, 46, 0.08);
     }
 
     * {
       box-sizing: border-box;
     }
 
+    html {
+      scroll-behavior: smooth;
+    }
+
     body {
       margin: 0;
       font-family: "Microsoft YaHei", "PingFang SC", "Noto Sans SC", sans-serif;
       color: var(--ink);
-      background: linear-gradient(180deg, #f7f4ef 0%, var(--bg) 100%);
+      background: var(--bg);
     }
 
-    .page {
-      max-width: 1180px;
-      margin: 0 auto;
-      padding: 28px 24px 36px;
+    .story {
+      width: 100%;
+      overflow-x: hidden;
     }
 
-    .header {
-      margin-bottom: 18px;
+    .hero {
+      position: relative;
+      min-height: 100vh;
+      display: flex;
+      align-items: end;
+      padding: 7vh 6vw;
+      background:
+        linear-gradient(180deg, rgba(25, 41, 46, 0.28) 0%, rgba(25, 41, 46, 0.38) 60%, rgba(25, 41, 46, 0.58) 100%),
+        url("https://upload.wikimedia.org/wikipedia/commons/1/1a/Birds_on_Poyang_Lake_%2815273717673%29.jpg") center/cover no-repeat;
+      color: #f7f4ee;
+    }
+
+    .hero-panel {
+      max-width: 760px;
+      padding: 28px 30px 30px;
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      background: rgba(16, 30, 35, 0.26);
+      backdrop-filter: blur(3px);
+      box-shadow: var(--shadow);
     }
 
     .eyebrow {
       display: inline-block;
-      margin-bottom: 12px;
+      margin-bottom: 18px;
       padding: 6px 12px;
+      border-radius: 999px;
+      background: rgba(173, 211, 233, 0.2);
+      color: #eef4f6;
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+    }
+
+    .hero h1 {
+      margin: 0;
+      font-size: clamp(42px, 6vw, 82px);
+      line-height: 1.05;
+      letter-spacing: -0.02em;
+    }
+
+    .hero .subtitle {
+      max-width: 680px;
+      margin: 24px 0 0;
+      font-size: clamp(20px, 2vw, 30px);
+      line-height: 1.5;
+      color: rgba(247, 244, 238, 0.94);
+    }
+
+    .hero .author {
+      margin-top: 26px;
+      font-size: 18px;
+      font-weight: 700;
+      color: rgba(247, 244, 238, 0.88);
+    }
+
+    .section {
+      position: relative;
+      padding: 80px 0;
+    }
+
+    .section.light {
+      background: linear-gradient(180deg, #f6f4ee 0%, #f4f2eb 100%);
+    }
+
+    .section.alt {
+      background: linear-gradient(180deg, #eef3ef 0%, #f5f2ec 100%);
+    }
+
+    .wrap {
+      width: min(1180px, calc(100% - 48px));
+      margin: 0 auto;
+    }
+
+    .intro-block {
+      max-width: 920px;
+      margin: 0 auto 36px;
+    }
+
+    .intro-block .tag {
+      display: inline-block;
+      margin-bottom: 18px;
+      padding: 6px 14px;
       border-radius: 999px;
       background: var(--accent-soft);
       color: var(--accent);
@@ -55,66 +132,58 @@
       font-weight: 700;
     }
 
-    h1 {
-      margin: 0 0 10px;
-      font-size: clamp(34px, 4vw, 50px);
+    .intro-block h2 {
+      margin: 0 0 16px;
+      font-size: clamp(36px, 4.5vw, 64px);
+      line-height: 1.1;
+    }
+
+    .intro-block p {
+      margin: 0;
+      max-width: 920px;
+      font-size: 20px;
+      line-height: 1.9;
+      color: var(--accent);
+    }
+
+    .map-card {
+      overflow: hidden;
+      border: 1px solid var(--border);
+      border-radius: 30px;
+      background: var(--panel);
+      box-shadow: var(--shadow);
+    }
+
+    .map-head {
+      padding: 28px 30px 22px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .map-head h3 {
+      margin: 0 0 8px;
+      font-size: clamp(28px, 3.4vw, 48px);
       line-height: 1.15;
     }
 
-    .subtitle {
-      max-width: 920px;
+    .map-head p {
       margin: 0;
-      color: var(--accent);
       font-size: 18px;
       line-height: 1.7;
-    }
-
-    .layout {
-      margin-top: 22px;
-    }
-
-    .panel {
-      border: 1px solid var(--border);
-      border-radius: 22px;
-      background: var(--panel);
-      box-shadow: 0 10px 32px rgba(0, 0, 0, 0.04);
-    }
-
-    .map-panel {
-      overflow: hidden;
-    }
-
-    .map-top {
-      padding: 20px 22px 14px;
-      border-bottom: 1px solid rgba(210, 216, 218, 0.8);
-    }
-
-    .map-top h2 {
-      margin: 0 0 6px;
-      font-size: 28px;
-    }
-
-    .map-top p {
-      margin: 0;
       color: var(--muted);
-      line-height: 1.6;
-      font-size: 16px;
     }
 
     #map {
       width: 100%;
-      height: 720px;
+      height: 72vh;
+      min-height: 620px;
+      max-height: 860px;
     }
 
     .caption {
-      padding: 18px 22px 22px;
-      color: var(--muted);
-      font-size: 15px;
+      padding: 20px 30px 28px;
+      font-size: 16px;
       line-height: 1.8;
-    }
-
-    .leaflet-control-attribution {
-      font-size: 11px;
+      color: var(--muted);
     }
 
     .text-label {
@@ -136,37 +205,108 @@
       color: #3e6f96;
     }
 
-    @media (max-width: 980px) {
+    .notes {
+      max-width: 900px;
+      margin: 34px auto 0;
+      padding: 24px 28px;
+      border-left: 4px solid var(--accent);
+      background: rgba(255, 252, 247, 0.85);
+      box-shadow: 0 10px 28px rgba(26, 39, 46, 0.05);
+    }
+
+    .notes h4 {
+      margin: 0 0 12px;
+      font-size: 24px;
+    }
+
+    .notes p {
+      margin: 0;
+      font-size: 18px;
+      line-height: 1.9;
+      color: var(--muted);
+    }
+
+    .footer-space {
+      height: 80px;
+      background: var(--bg);
+    }
+
+    .leaflet-control-attribution {
+      font-size: 11px;
+    }
+
+    @media (max-width: 900px) {
+      .hero {
+        min-height: 90vh;
+        padding: 7vh 24px 28px;
+      }
+
+      .hero-panel {
+        padding: 22px 20px 24px;
+      }
+
+      .section {
+        padding: 56px 0;
+      }
+
       #map {
-        height: 560px;
+        height: 62vh;
+        min-height: 500px;
+      }
+
+      .intro-block p,
+      .notes p,
+      .map-head p {
+        font-size: 17px;
       }
     }
   </style>
 </head>
 <body>
-  <main class="page">
-    <header class="header">
-      <div class="eyebrow">区位图</div>
-      <h1>鄱阳湖区位图</h1>
-      <p class="subtitle">
-        鄱阳湖位于长江中下游，连接赣江、抚河、饶河、信江和修水。复杂的河湖关系与季节性水位波动，共同塑造了其独特的水质变化格局。
-      </p>
-    </header>
-
-    <section class="layout">
-      <section class="panel map-panel">
-        <div class="map-top">
-          <h2>长江中下游与鄱阳湖</h2>
-          <p>主图突出鄱阳湖、长江、湖口以及五大入湖河流的空间关系。</p>
-        </div>
-
-        <div id="map" aria-label="鄱阳湖区位图"></div>
-
-        <div class="caption">
-          图注：鄱阳湖位于长江中下游，连接五大入湖河流。复杂的河湖关系与季节性水位波动，共同塑造了其独特的水质变化格局。
-        </div>
-      </section>
+  <main class="story">
+    <section class="hero">
+      <div class="hero-panel">
+        <div class="eyebrow">地图故事</div>
+        <h1>守望鄱阳湖</h1>
+        <p class="subtitle">中国最大淡水湖的“健康体检报告”</p>
+        <div class="author">Cao Xinyu</div>
+      </div>
     </section>
+
+    <section class="section alt">
+      <div class="wrap">
+        <div class="intro-block">
+          <div class="tag">区位图</div>
+          <h2>为什么是鄱阳湖</h2>
+          <p>
+            鄱阳湖位于长江中下游，连接赣江、抚河、饶河、信江和修水。复杂的河湖关系与季节性水位波动，
+            共同塑造了其独特的水质变化格局。
+          </p>
+        </div>
+
+        <article class="map-card">
+          <header class="map-head">
+            <h3>一座与长江相连的湖</h3>
+            <p>主图突出鄱阳湖、长江、湖口以及五大入湖河流的空间关系。</p>
+          </header>
+          <div id="map" aria-label="鄱阳湖区位图"></div>
+          <div class="caption">
+            图注：鄱阳湖位于长江中下游，连接五大入湖河流。复杂的河湖关系与季节性水位波动，
+            共同塑造了其独特的水质变化格局。
+          </div>
+        </article>
+
+        <section class="notes">
+          <h4>一座会随季节改变形态的湖</h4>
+          <p>
+            从丰水期到枯水期，鄱阳湖的水面范围、水位高低和河湖连通状态都在变化。
+            理解这一点，是进入后续水质时空变化分析的关键起点。
+          </p>
+        </section>
+      </div>
+    </section>
+
+    <div class="footer-space"></div>
   </main>
 
   <script
@@ -182,18 +322,18 @@
       maxZoom: 11
     });
 
-    const esriWorldTopo = L.tileLayer(
-      "https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}",
-      {
-        attribution: "Tiles &copy; Esri"
-      }
-    );
-
     const cartoLight = L.tileLayer(
       "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png",
       {
         subdomains: "abcd",
         attribution: "&copy; OpenStreetMap contributors &copy; CARTO"
+      }
+    );
+
+    const esriWorldTopo = L.tileLayer(
+      "https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}",
+      {
+        attribution: "Tiles &copy; Esri"
       }
     );
 
@@ -212,7 +352,7 @@
     const lineStyle = {
       color: "#5e9ccb",
       weight: 3,
-      opacity: 0.9,
+      opacity: 0.92,
       dashArray: "8 6"
     };
 
@@ -313,14 +453,6 @@
         className: "text-label lake-label",
         html: "鄱阳湖",
         iconSize: [90, 24]
-      })
-    }).addTo(map);
-
-    L.marker([28.62, 115.90], {
-      icon: L.divIcon({
-        className: "text-label",
-        html: "江西省",
-        iconSize: [70, 18]
       })
     }).addTo(map);
 
